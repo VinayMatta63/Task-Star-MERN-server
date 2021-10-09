@@ -133,10 +133,11 @@ router.get("/getUser", auth, async (req, res) => {
   try {
     // request.user is getting fetched from Middleware after token authentication
     const user = await User.findById(req.user.id);
+    console.log(user);
     res.json(user);
   } catch (e) {
     console.log(e);
-    res.send({ message: "Error in Fetching user" });
+    res.send({ message: e });
   }
 });
 

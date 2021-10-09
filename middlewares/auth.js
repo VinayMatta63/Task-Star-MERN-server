@@ -6,7 +6,6 @@ module.exports = function (req, res, next) {
   try {
     const token = bearerHeader.split(" ")[1];
     const decoded = jwt.verify(token, "randomString");
-    console.log(decoded);
     req.user = decoded.user;
     next();
   } catch (e) {
