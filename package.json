@@ -1,0 +1,25 @@
+{
+  "name": "task_manager_server",
+  "version": "1.0.0",
+  "description": "A Click Up like task manager app using MERN Stack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Vinay Matta",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.12.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.9",
+    "pusher": "^5.0.0"
+  },
+  "engines": {
+    "node": "14.x"
+  }
+}
