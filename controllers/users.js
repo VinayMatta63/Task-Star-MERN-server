@@ -128,11 +128,20 @@ module.exports.continueWithGoogle = async (req, res) => {
       user = new User(userData);
       await user.save();
     }
-    const payload = { user: { id: user.id } };
-    //   Creating JWt Token
+    const payload = {
+      user: {
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at,
+        full_name: user.full_name,
+      },
+    };
     jwt.sign(payload, "randomString", { expiresIn: "1d" }, (err, token) => {
       if (err) throw err;
       res.status(200).json({
+        email: payload.user.email,
+        full_name: payload.user.full_name,
+        created_at: payload.user.created_at,
         token,
       });
     });
