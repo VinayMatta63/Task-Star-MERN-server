@@ -122,6 +122,7 @@ module.exports.getUser = async (req, res) => {
 module.exports.continueWithGoogle = async (req, res) => {
   try {
     let token = req.body.token;
+    console.log(token);
     let userData = await verifyToken(token);
     let user = await User.findOne({ email: userData.email });
     if (!user) {
