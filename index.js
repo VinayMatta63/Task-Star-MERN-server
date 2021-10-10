@@ -31,7 +31,6 @@ const userCollection = db.collection("users");
 app.use("/auth", user);
 app.get("/", (req, res) => {
   res.send("Hello World!");
-  res.redirect("/");
 });
 
 app.listen(port, () => {

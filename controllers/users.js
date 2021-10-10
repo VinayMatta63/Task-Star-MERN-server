@@ -29,13 +29,22 @@ module.exports.signupUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
     await user.save();
-    const payload = { user: { id: user.id } };
+    const payload = {
+      user: {
+        name: user.full_name,
+        email: user.email,
+        created_at: user.created_at,
+        id: user.id,
+      },
+    };
     //   Creating JWt Token
     jwt.sign(payload, "randomString", { expiresIn: "1d" }, (err, token) => {
       if (err) throw err;
       res.status(200).json({
-        email,
-        full_name,
+        email: payload.user.email,
+        full_name: payload.user.name,
+        id: payload.user.id,
+        created_at: payload.user.created_at,
         token,
       });
     });
@@ -54,7 +63,6 @@ module.exports.loginUser = async (req, res) => {
   }
 
   const { email, password } = req.body;
-
   try {
     let user = await User.findOne({ email });
     if (!user) {
@@ -70,6 +78,9 @@ module.exports.loginUser = async (req, res) => {
 
     const payload = {
       user: {
+        name: user.full_name,
+        email: user.email,
+        created_at: user.created_at,
         id: user.id,
       },
     };
@@ -77,14 +88,17 @@ module.exports.loginUser = async (req, res) => {
     // retrieve JWT Token
     jwt.sign(payload, "randomString", { expiresIn: "1d" }, (err, token) => {
       if (err) throw err;
-      res.status(200).json({
-        email,
-        full_name,
+
+      return res.status(200).json({
+        email: payload.user.email,
+        full_name: payload.user.name,
+        id: payload.user.id,
+        created_at: payload.user.created_at,
         token,
       });
     });
   } catch (e) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server Error",
     });
   }
@@ -94,7 +108,12 @@ module.exports.getUser = async (req, res) => {
   try {
     // request.user is getting fetched from Middleware after token authentication
     const user = await User.findById(req.user.id);
-    res.json(user);
+    res.json({
+      email: user.email,
+      created_at: user.created_at,
+      id: user.id,
+      full_name: user.full_name,
+    });
   } catch (e) {
     res.send({ message: "Couldn't Fetch User" });
   }
