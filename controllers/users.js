@@ -34,6 +34,8 @@ module.exports.signupUser = async (req, res) => {
     jwt.sign(payload, "randomString", { expiresIn: "1d" }, (err, token) => {
       if (err) throw err;
       res.status(200).json({
+        email,
+        full_name,
         token,
       });
     });
