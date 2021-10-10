@@ -152,15 +152,19 @@ module.exports.continueWithGoogle = async (req, res) => {
 };
 
 async function verifyToken(token) {
-  const result = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.googleClientToken,
-  });
-  const payload = result.getPayload();
-  let user = {
-    email: payload.email,
-    full_name: payload.name,
-    created_at: Date.now(),
-  };
-  return user;
+  try {
+    const result = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.googleClientToken,
+    });
+    const payload = result.getPayload();
+    let user = {
+      email: payload.email,
+      full_name: payload.name,
+      created_at: Date.now(),
+    };
+    return user;
+  } catch (e) {
+    console.log(e);
+  }
 }
