@@ -146,7 +146,7 @@ module.exports.continueWithGoogle = async (req, res) => {
       });
     });
   } catch (e) {
-    console.log(err.message);
+    console.log(e.message);
     res.status(500).send("Error Occured");
   }
 };
