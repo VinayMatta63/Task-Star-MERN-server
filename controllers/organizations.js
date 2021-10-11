@@ -122,10 +122,15 @@ module.exports.addMemberOrg = async (req, res) => {
       _id: org_id,
       $set: { members: newMembers },
     });
-    userArray.forEach((item, index) => {
-      let user = await User.findOne({ _id: item });
+    // console.log(userArray);
+
+    userArray.forEach(async (item, index) => {
+      console.log(item);
+
+      let user = await User.findOne({ id: item });
+      console.log(user);
       await User.updateOne({
-        _id: user._id,
+        id: user.id,
         $set: { org_id: org_id },
       });
     });
