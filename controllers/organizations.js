@@ -41,7 +41,9 @@ module.exports.createTasklist = async (req, res) => {
       id: org_id,
       $set: { tasklist: org.tasklist },
     });
-    res.status(200).json({ message: "Tasklist created successfully" });
+    res
+      .status(200)
+      .json({ message: "Tasklist created successfully", data: org.tasklist });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -69,7 +71,9 @@ module.exports.createTask = async (req, res) => {
       id: tasklist_id,
       $set: { tasks: tasklist.tasks },
     });
-    res.status(200).json({ message: "Task created successfully" });
+    res
+      .status(200)
+      .json({ message: "Task created successfully", data: tasklist.tasks });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -91,7 +95,10 @@ module.exports.addMember = async (req, res) => {
       _id: task_id,
       $set: { assignees: newAssignees },
     });
-    res.status(200).json({ message: "Members added Successfully" });
+    res.status(200).json({
+      message: "Members added Successfully",
+      data: { assignees: newAssignees },
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -114,7 +121,10 @@ module.exports.addMemberOrg = async (req, res) => {
       _id: org_id,
       $set: { members: newMembers },
     });
-    res.status(200).json({ message: "Members added to Organization" });
+    res.status(200).json({
+      message: "Members added to Organization",
+      data: { members: newMembers },
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -155,7 +165,10 @@ module.exports.removeMember = async (req, res) => {
       _id: org_id,
       $set: { members: newMembers },
     });
-    res.status(200).json({ message: "Members removed from Organization" });
+    res.status(200).json({
+      message: "Members removed from Organization",
+      data: { members: newMembers },
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
