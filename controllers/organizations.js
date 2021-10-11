@@ -122,13 +122,9 @@ module.exports.addMemberOrg = async (req, res) => {
       _id: org_id,
       $set: { members: newMembers },
     });
-    // console.log(userArray);
-
+    org.members = newMembers;
     userArray.forEach(async (item, index) => {
-      console.log(item);
-
       let user = await User.findOne({ id: item });
-      console.log(user);
       await User.updateOne({
         id: user.id,
         $set: { org_id: org_id },
@@ -136,10 +132,10 @@ module.exports.addMemberOrg = async (req, res) => {
     });
     res.status(200).json({
       message: "Members added to Organization",
-      data: { members: newMembers },
+      data: org,
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e });
   }
 };
 
