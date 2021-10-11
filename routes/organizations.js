@@ -69,4 +69,10 @@ router.post(
   ],
   organizations.removeMember
 );
+
+router.post(
+  "/getOrg",
+  [body("org_id", "Organization ID required").notEmpty()],
+  organizations.getOrgData
+);
 module.exports = router;

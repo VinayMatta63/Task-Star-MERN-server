@@ -182,3 +182,17 @@ module.exports.removeMember = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+
+module.exports.getOrgData = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { org_id } = req.body;
+  try {
+    const org = await Organization.findOne({ id: org_id });
+    res.status(200).json({ data: org });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
