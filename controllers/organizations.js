@@ -1,4 +1,5 @@
 const Organization = require("../models/organizations");
+const User = require("../models/users");
 const Tasklist = require("../models/tasklists");
 const Task = require("../models/tasks");
 const { validationResult } = require("express-validator");
@@ -120,6 +121,13 @@ module.exports.addMemberOrg = async (req, res) => {
     await Organization.updateOne({
       _id: org_id,
       $set: { members: newMembers },
+    });
+    userArray.forEach((item, index) => {
+      let user = await User.findOne({ _id: item });
+      await User.updateOne({
+        _id: user._id,
+        $set: { org_id: org_id },
+      });
     });
     res.status(200).json({
       message: "Members added to Organization",
