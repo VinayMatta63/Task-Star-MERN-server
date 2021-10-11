@@ -18,7 +18,9 @@ module.exports.createOrg = async (req, res) => {
       tasklist: [],
     });
     await org.save();
-    res.status(200).json({ message: "Organisation saved Successfully!" });
+    res
+      .status(200)
+      .json({ message: "Organisation saved Successfully!", data: org });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
