@@ -82,6 +82,7 @@ module.exports.loginUser = async (req, res) => {
         email: user.email,
         created_at: user.created_at,
         id: user.id,
+        org_id: user.org_id,
       },
     };
 
@@ -94,12 +95,13 @@ module.exports.loginUser = async (req, res) => {
         full_name: payload.user.name,
         id: payload.user.id,
         created_at: payload.user.created_at,
+        org_id: payload.user.org_id,
         token,
       });
     });
   } catch (e) {
     return res.status(500).json({
-      message: "Server Error",
+      message: e.message,
     });
   }
 };
@@ -113,6 +115,7 @@ module.exports.getUser = async (req, res) => {
       created_at: user.created_at,
       id: user.id,
       full_name: user.full_name,
+      org_id: user.org_id,
     });
   } catch (e) {
     res.send({ message: "Couldn't Fetch User" });
