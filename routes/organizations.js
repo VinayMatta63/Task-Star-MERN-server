@@ -60,4 +60,13 @@ router.post(
   ],
   organizations.changeStatus
 );
+
+router.post(
+  "/removeMember",
+  [
+    body("org_id", "Organization ID required").notEmpty(),
+    body("user_id", "User required").notEmpty(),
+  ],
+  organizations.removeMember
+);
 module.exports = router;

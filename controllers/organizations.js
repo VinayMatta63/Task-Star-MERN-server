@@ -108,12 +108,10 @@ module.exports.addMemberOrg = async (req, res) => {
     let newMembers = org.members.filter(
       (item, index) => org.members.indexOf(item) === index
     );
-
     await Organization.updateOne({
       _id: org_id,
       $set: { members: newMembers },
     });
-
     res.status(200).json({ message: "Members added to Organization" });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -137,6 +135,25 @@ module.exports.changeStatus = async (req, res) => {
     } else {
       res.status(400).json({ error: "Only Assignees can change status." });
     }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+module.exports.removeMember = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { org_id, user_id } = req.body;
+  try {
+    let org = await Organization.findOne({ _id: org_id });
+    let newMembers = org.members.filter((item) => item != user_id);
+    await Organization.updateOne({
+      _id: org_id,
+      $set: { members: newMembers },
+    });
+    res.status(200).json({ message: "Members removed from Organization" });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
