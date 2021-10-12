@@ -191,7 +191,28 @@ module.exports.getOrgData = async (req, res) => {
   const { org_id } = req.body;
   try {
     const org = await Organization.findOne({ id: org_id });
-    res.status(200).json({ data: org });
+    const tasklists = await Tasklist.find({ org_id: org_id });
+    const allTasks = {};
+    for (let tasklist of tasklists) {
+      const tasks = await Task.find({ tasklist_id: tasklist.id });
+      allTasks[tasklist.id] = tasks;
+    }
+    res
+      .status(200)
+      .json({ data: { org_data: org, tasklist: tasklists, tasks: allTasks } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+module.exports.getTasks = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { tasklist_id } = req.body;
+  try {
+    const tasks = await Task.find({ tasklist_id: tasklist_id });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
