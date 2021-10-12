@@ -10,6 +10,7 @@ module.exports.createOrg = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   const { creator, name, desc } = req.body;
+  console.log(creator);
   try {
     let org = new Organization({
       creator: creator,
@@ -19,13 +20,23 @@ module.exports.createOrg = async (req, res) => {
       tasklist: [],
     });
     const orgData = await org.save();
-    await User.updateOne({
-      id: creator,
-      $set: { org_id: orgData.id },
-    });
+
+    const userData = await User.findOneAndUpdate(
+      { _id: creator },
+      { org_id: orgData._id },
+      { new: true }
+    );
+    console.log(userData, orgData);
+    const members = {};
+    members[userData._id] = userData;
     res.status(200).json({
       message: "Organisation saved Successfully!",
-      data: orgData,
+      data: {
+        org_data: orgData,
+        members: members,
+        tasklist: [],
+        tasks: [],
+      },
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -74,7 +85,7 @@ module.exports.createTask = async (req, res) => {
     let tasklist = await Tasklist.findOne({ _id: tasklist_id });
     tasklist.tasks.push(task);
     await Tasklist.updateOne({
-      id: tasklist_id,
+      _id: tasklist_id,
       $set: { tasks: tasklist.tasks },
     });
     res
@@ -129,9 +140,9 @@ module.exports.addMemberOrg = async (req, res) => {
     });
     org.members = newMembers;
     userArray.forEach(async (item, index) => {
-      let user = await User.findOne({ id: item });
+      let user = await User.findOne({ _id: item });
       await User.updateOne({
-        id: user.id,
+        _id: user.id,
         $set: { org_id: org_id },
       });
     });
@@ -195,12 +206,12 @@ module.exports.getOrgData = async (req, res) => {
   }
   const { org_id } = req.body;
   try {
-    const org = await Organization.findOne({ id: org_id });
+    const org = await Organization.findOne({ _id: org_id });
     const tasklists = await Tasklist.find({ org_id: org.id });
 
     const allMembers = {};
     for (let member of org.members) {
-      allMembers[member] = await User.find({ id: member });
+      allMembers[member] = await User.findOne({ _id: member });
     }
     const allTasks = {};
     for (let tasklist of tasklists) {

@@ -35,7 +35,7 @@ module.exports.signupUser = async (req, res) => {
         email: user.email,
         created_at: user.created_at,
         id: user.id,
-        org_id: org_id,
+        org_id: user.org_id,
       },
     };
     //   Creating JWt Token
@@ -46,6 +46,7 @@ module.exports.signupUser = async (req, res) => {
         full_name: payload.user.name,
         id: payload.user.id,
         created_at: payload.user.created_at,
+        org_id: payload.user.org_id,
         token,
       });
     });
@@ -139,6 +140,7 @@ module.exports.continueWithGoogle = async (req, res) => {
         email: user.email,
         created_at: user.created_at,
         full_name: user.full_name,
+        org_id: user.org_id,
       },
     };
     jwt.sign(payload, "randomString", { expiresIn: "1d" }, (err, token) => {
@@ -147,6 +149,8 @@ module.exports.continueWithGoogle = async (req, res) => {
         email: payload.user.email,
         full_name: payload.user.full_name,
         created_at: payload.user.created_at,
+        org_id: payload.user.org_id,
+
         token,
       });
     });
