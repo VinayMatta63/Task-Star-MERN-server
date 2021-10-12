@@ -19,13 +19,14 @@ module.exports.createOrg = async (req, res) => {
       tasklist: [],
     });
     const orgData = await org.save();
-    await User.updateOne({
+    const userData = await User.updateOne({
       id: creator,
       $set: { org_id: orgData.id },
     });
-    res
-      .status(200)
-      .json({ message: "Organisation saved Successfully!", data: org });
+    res.status(200).json({
+      message: "Organisation saved Successfully!",
+      data: { org_data: orgData, tasklist: [], tasks: [], members: [userData] },
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

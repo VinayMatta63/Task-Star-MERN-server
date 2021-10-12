@@ -35,6 +35,7 @@ module.exports.signupUser = async (req, res) => {
         email: user.email,
         created_at: user.created_at,
         id: user.id,
+        org_id: org_id,
       },
     };
     //   Creating JWt Token
