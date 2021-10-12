@@ -18,7 +18,11 @@ module.exports.createOrg = async (req, res) => {
       members: [creator],
       tasklist: [],
     });
-    await org.save();
+    const orgData = await org.save();
+    await User.updateOne({
+      id: creator,
+      $set: { org_id: orgData.id },
+    });
     res
       .status(200)
       .json({ message: "Organisation saved Successfully!", data: org });
@@ -191,29 +195,36 @@ module.exports.getOrgData = async (req, res) => {
   const { org_id } = req.body;
   try {
     const org = await Organization.findOne({ id: org_id });
-    const tasklists = await Tasklist.find({ org_id: org_id });
+    const tasklists = await Tasklist.find({ org_id: org.id });
+
+    const allMembers = {};
+    for (let member of org.members) {
+      allMembers[member] = await User.find({ id: member });
+    }
     const allTasks = {};
     for (let tasklist of tasklists) {
-      const tasks = await Task.find({ tasklist_id: tasklist.id });
-      allTasks[tasklist.id] = tasks;
+      allTasks[tasklist.id] = await Task.find({ tasklist_id: tasklist.id });
     }
-    res
-      .status(200)
-      .json({ data: { org_data: org, tasklist: tasklists, tasks: allTasks } });
+    res.status(200).json({
+      org_data: org,
+      tasklist: tasklists,
+      tasks: allTasks,
+      members: allMembers,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 };
 
-module.exports.getTasks = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: errors.array() });
-  }
-  const { tasklist_id } = req.body;
-  try {
-    const tasks = await Task.find({ tasklist_id: tasklist_id });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-};
+// module.exports.getTasks = async (req, res) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     res.status(400).json({ error: errors.array() });
+//   }
+//   const { tasklist_id } = req.body;
+//   try {
+//     const tasks = await Task.find({ tasklist_id: tasklist_id });
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// };
