@@ -74,7 +74,7 @@ module.exports.addMemberOrg = async (req, res) => {
 
     res.status(200).json({
       message: "Members added to Organization",
-      data: { member: user },
+      data: user,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -203,15 +203,18 @@ module.exports.removeMember = async (req, res) => {
   }
   const { org_id, user_id } = req.body;
   try {
-    let org = await Organization.findOne({ _id: org_id });
-    let newMembers = org.members.filter((item) => item != user_id);
-    await Organization.updateOne({
-      _id: org_id,
-      $set: { members: newMembers },
-    });
+    await Organization.findOneAndUpdate(
+      { _id: org_id },
+      { $pull: { members: user_id } },
+      { new: true }
+    );
+    const user = await User.findOneAndUpdate(
+      { _id: user_id },
+      { $set: { org_id: null } }
+    );
     res.status(200).json({
       message: "Members removed from Organization",
-      data: { members: newMembers },
+      data: user,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -248,16 +251,3 @@ module.exports.getOrgData = async (req, res) => {
     console.log({ error: e });
   }
 };
-
-// module.exports.getTasks = async (req, res) => {
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     res.status(400).json({ error: errors.array() });
-//   }
-//   const { tasklist_id } = req.body;
-//   try {
-//     const tasks = await Task.find({ tasklist_id: tasklist_id });
-//   } catch (e) {
-//     res.status(500).json({ error: e.message });
-//   }
-// };

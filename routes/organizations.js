@@ -25,7 +25,7 @@ router.post(
 );
 
 router.post(
-  "/createTask",
+  "/create-task",
   [
     body("title", "Title not specified.").notEmpty(),
     body("desc", "Description not specified.").notEmpty(),
@@ -62,7 +62,7 @@ router.post(
 );
 
 router.post(
-  "/removeMember",
+  "/remove-member-org",
   [
     body("org_id", "Organization ID required").notEmpty(),
     body("user_id", "User required").notEmpty(),
