@@ -4,13 +4,19 @@ const Tasklist = require("../models/tasklists");
 const Task = require("../models/tasks");
 const { validationResult } = require("express-validator");
 
+/*
+ *
+ *
+  Controller for creating a new organization.
+ *
+ *
+ */
 module.exports.createOrg = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   const { creator, name, desc } = req.body;
-  console.log(creator);
   try {
     let org = new Organization({
       creator: creator,
@@ -20,13 +26,11 @@ module.exports.createOrg = async (req, res) => {
       tasklist: [],
     });
     const orgData = await org.save();
-
     const userData = await User.findOneAndUpdate(
       { _id: creator },
       { org_id: orgData._id },
       { new: true }
     );
-    console.log(userData, orgData);
     const members = {};
     members[userData._id] = userData;
     res.status(200).json({
@@ -43,29 +47,78 @@ module.exports.createOrg = async (req, res) => {
   }
 };
 
-module.exports.createTasklist = async (req, res) => {
+/*
+ *
+ *
+  Controller for adding new members to organization
+ *
+ *
+ */
+module.exports.addMemberOrg = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    res.status(400).json({ error: errors.array() });
   }
-  const { title, org_id } = req.body;
+  const { org_id, email } = req.body;
   try {
-    let tasklist = new Tasklist({ title: title, org_id: org_id, tasks: [] });
-    await tasklist.save();
-    let org = await Organization.findOne({ _id: org_id });
-    org.tasklist.push(tasklist);
-    await Organization.updateOne({
-      id: org_id,
-      $set: { tasklist: org.tasklist },
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { $set: { org_id: org_id } },
+      { new: true }
+    );
+    await Organization.findOneAndUpdate(
+      { id: org_id },
+      { $push: { members: user._id } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Members added to Organization",
+      data: { member: user },
     });
-    res
-      .status(200)
-      .json({ message: "Tasklist created successfully", data: org.tasklist });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 };
 
+/*
+ *
+ *
+   Controller to create a tasklist
+ *
+ *
+ */
+module.exports.createTasklist = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { title, org_id } = req.body;
+  try {
+    let tasklist = new Tasklist({ title: title, org_id: org_id, tasks: [] });
+    const savedList = await tasklist.save();
+    await Organization.findOneAndUpdate(
+      { id: org_id },
+      { $push: { tasklist: savedList._id } },
+      { new: true }
+    );
+    res.status(200).json({
+      message: "Tasklist created successfully",
+      data: savedList,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+/*
+ *
+ *
+   Controller to create a task.
+ *
+ *
+ */
 module.exports.createTask = async (req, res) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {
@@ -121,40 +174,6 @@ module.exports.addMember = async (req, res) => {
   }
 };
 
-module.exports.addMemberOrg = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: errors.array() });
-  }
-  const { org_id, userArray } = req.body;
-  try {
-    let org = await Organization.findOne({ _id: org_id });
-
-    org.members.push(...userArray);
-    let newMembers = org.members.filter(
-      (item, index) => org.members.indexOf(item) === index
-    );
-    await Organization.updateOne({
-      _id: org_id,
-      $set: { members: newMembers },
-    });
-    org.members = newMembers;
-    userArray.forEach(async (item, index) => {
-      let user = await User.findOne({ _id: item });
-      await User.updateOne({
-        _id: user.id,
-        $set: { org_id: org_id },
-      });
-    });
-    res.status(200).json({
-      message: "Members added to Organization",
-      data: org,
-    });
-  } catch (e) {
-    res.status(500).json({ error: e });
-  }
-};
-
 module.exports.changeStatus = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -206,8 +225,8 @@ module.exports.getOrgData = async (req, res) => {
   }
   const { org_id } = req.body;
   try {
-    const org = await Organization.findOne({ _id: org_id });
-    const tasklists = await Tasklist.find({ org_id: org.id });
+    const org = await Organization.findOne({ id: org_id });
+    const tasklists = await Tasklist.find({ org_id: org_id });
 
     const allMembers = {};
     for (let member of org.members) {
@@ -217,6 +236,7 @@ module.exports.getOrgData = async (req, res) => {
     for (let tasklist of tasklists) {
       allTasks[tasklist.id] = await Task.find({ tasklist_id: tasklist.id });
     }
+
     res.status(200).json({
       org_data: org,
       tasklist: tasklists,
@@ -225,6 +245,7 @@ module.exports.getOrgData = async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
+    console.log({ error: e });
   }
 };
 

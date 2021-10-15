@@ -43,10 +43,10 @@ router.post(
   organizations.addMember
 );
 router.post(
-  "/addMemberOrg",
+  "/add-member-org",
   [
     body("org_id", "Organization ID required").notEmpty(),
-    body("userArray", "User required").isArray({ min: 1 }),
+    body("email", "User email required").isEmail().notEmpty(),
   ],
   organizations.addMemberOrg
 );
