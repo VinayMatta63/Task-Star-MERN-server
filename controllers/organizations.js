@@ -134,68 +134,26 @@ module.exports.createTask = async (req, res) => {
       status: status,
       assignees: [],
     });
-    await task.save();
-    let tasklist = await Tasklist.findOne({ _id: tasklist_id });
-    tasklist.tasks.push(task);
-    await Tasklist.updateOne({
-      _id: tasklist_id,
-      $set: { tasks: tasklist.tasks },
-    });
+    const savedTask = await task.save();
+    await Tasklist.findOneAndUpdate(
+      { id: tasklist_id },
+      { $push: { tasks: savedTask } }
+    );
     res
       .status(200)
-      .json({ message: "Task created successfully", data: tasklist.tasks });
+      .json({ message: "Task created successfully", data: savedTask });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 };
 
-module.exports.addMember = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: errors.array() });
-  }
-  const { task_id, userArray } = req.body;
-  try {
-    let tasks = await Task.findOne({ _id: task_id });
-    tasks.assignees.push(...userArray);
-    let newAssignees = tasks.assignees.filter(
-      (item, index) => tasks.assignees.indexOf(item) === index
-    );
-    await Task.updateOne({
-      _id: task_id,
-      $set: { assignees: newAssignees },
-    });
-    res.status(200).json({
-      message: "Members added Successfully",
-      data: { assignees: newAssignees },
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-};
-
-module.exports.changeStatus = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: errors.array() });
-  }
-  const { task_id, user_id, status } = req.body;
-  try {
-    let task = await Task.findOne({ _id: task_id });
-    if (task.assignees.includes(user_id)) {
-      await Task.updateOne({
-        _id: task_id,
-        $set: { status: status },
-      });
-      res.status(200).json({ message: "Task status updated successfully" });
-    } else {
-      res.status(400).json({ error: "Only Assignees can change status." });
-    }
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-};
-
+/*
+ *
+ *
+   Controller to remove member from organization.
+ *
+ *
+ */
 module.exports.removeMember = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -221,6 +179,76 @@ module.exports.removeMember = async (req, res) => {
   }
 };
 
+/*
+ *
+ *
+   Controller to add member to task assignees.
+ *
+ *
+ */
+module.exports.addMember = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { task_id, userArray } = req.body;
+  try {
+    let tasks = await Task.findOne({ _id: task_id });
+
+    const task = await Task.findOneAndUpdate(
+      { _id: task_id },
+      { $push: { assignees: userArray } },
+      { new: true }
+    );
+    console.log(task);
+    res.status(200).json({
+      message: "Members added Successfully",
+      data: userArray,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+/*
+ *
+ *
+   Controller to change status of task.
+ *
+ *
+ */
+module.exports.changeStatus = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { task_id, user_id, status } = req.body;
+  try {
+    let task = await Task.findOne({ _id: task_id });
+    if (task.assignees.includes(user_id)) {
+      await Task.findOneAndUpdate(
+        { _id: task_id },
+        { $set: { status: status } },
+        { new: true }
+      );
+      res
+        .status(200)
+        .json({ message: "Task status updated successfully", data: status });
+    } else {
+      res.status(400).json({ error: "Only Assignees can change status." });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+/*
+ *
+ *
+   Controller to get organization data.
+ *
+ *
+ */
 module.exports.getOrgData = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

@@ -35,7 +35,7 @@ router.post(
 );
 
 router.post(
-  "/addMember",
+  "/add-member-task",
   [
     body("task_id", "Task ID required").notEmpty(),
     body("userArray", "User ID required").isArray({ min: 1 }),
@@ -52,7 +52,7 @@ router.post(
 );
 
 router.post(
-  "/changeStatus",
+  "/change-status",
   [
     body("task_id", "Task ID required").notEmpty(),
     body("user_id", "User required").notEmpty(),
