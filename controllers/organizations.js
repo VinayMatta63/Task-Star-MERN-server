@@ -73,7 +73,7 @@ module.exports.addMemberOrg = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Members added to Organization",
+      message: "Member added to Organization",
       data: user,
     });
   } catch (e) {
@@ -171,7 +171,7 @@ module.exports.removeMember = async (req, res) => {
       { $set: { org_id: null } }
     );
     res.status(200).json({
-      message: "Members removed from Organization",
+      message: "Member removed from Organization",
       data: user,
     });
   } catch (e) {
@@ -202,7 +202,7 @@ module.exports.addMember = async (req, res) => {
     );
     console.log(task);
     res.status(200).json({
-      message: "Members added Successfully",
+      message: "Assigned Successfully!",
       data: userArray,
     });
   } catch (e) {
@@ -233,12 +233,12 @@ module.exports.changeStatus = async (req, res) => {
       );
       res
         .status(200)
-        .json({ message: "Task status updated successfully", data: status });
+        .json({ message: `Task status changed to ${status}`, data: status });
     } else {
-      res.status(400).json({ error: "Only Assignees can change status." });
+      res.status(400).json({ message: "Only Assignees can change status!" });
     }
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ message: e.message });
   }
 };
 
