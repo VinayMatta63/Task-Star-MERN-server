@@ -66,6 +66,7 @@ router.post(
   [
     body("org_id", "Organization ID required").notEmpty(),
     body("user_id", "User required").notEmpty(),
+    body("request_user_id", "Requesting user required"),
   ],
   organizations.removeMember
 );
@@ -74,5 +75,16 @@ router.post(
   "/getOrg",
   [body("org_id", "Organization ID required").notEmpty()],
   organizations.getOrgData
+);
+
+router.post(
+  "/remove-member-task",
+  [
+    body("task_id", "Task ID required").notEmpty(),
+    body("org_id", "Organisation ID required").notEmpty(),
+    body("user_id", "User required").notEmpty(),
+    body("request_user_id", "Requesting User required").notEmpty(),
+  ],
+  organizations.removeMemberTask
 );
 module.exports = router;

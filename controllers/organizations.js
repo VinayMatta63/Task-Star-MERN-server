@@ -159,26 +159,71 @@ module.exports.removeMember = async (req, res) => {
   if (!errors.isEmpty()) {
     res.status(400).json({ error: errors.array() });
   }
-  const { org_id, user_id } = req.body;
+  const { org_id, user_id, request_user_id } = req.body;
   try {
-    await Organization.findOneAndUpdate(
-      { _id: org_id },
-      { $pull: { members: user_id } },
-      { new: true }
-    );
-    const user = await User.findOneAndUpdate(
-      { _id: user_id },
-      { $set: { org_id: null } }
-    );
-    res.status(200).json({
-      message: "Member removed from Organization",
-      data: user,
-    });
+    const org = await Organization.findOne({ _id: org_id });
+    if (!(org.creator.toString() == request_user_id)) {
+      res.status(400).json({ message: "Only Owner can remove members" });
+    } else {
+      await Organization.findOneAndUpdate(
+        { _id: org_id },
+        { $pull: { members: user_id } },
+        { new: true }
+      );
+      const user = await User.findOneAndUpdate(
+        { _id: user_id },
+        { $set: { org_id: null } }
+      );
+      await Task.updateMany(
+        { assignees: { $in: [user_id] } },
+        { $pull: { assignees: user_id } },
+        { new: true }
+      );
+      res.status(200).json({
+        message: "Member removed from Organization",
+        data: user,
+      });
+    }
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 };
 
+/*
+ *
+ *
+   Controller to remove member from task.
+ *
+ *
+ */
+module.exports.removeMemberTask = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array() });
+  }
+  const { task_id, user_id, request_user_id, org_id } = req.body;
+  try {
+    const org = await Organization.findOne({ _id: org_id });
+    console.log(org.members.includes(request_user_id));
+    if (!org.members.includes(request_user_id)) {
+      res
+        .status(400)
+        .json({ message: "Only a Member of Organization can do this." });
+    } else {
+      const task = await Task.findOneAndUpdate(
+        { _id: task_id },
+        { $pull: { assignees: user_id } },
+        { new: true }
+      );
+      res.status(200).json({
+        message: "Member removed from Task",
+        data: task,
+      });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
 /*
  *
  *
